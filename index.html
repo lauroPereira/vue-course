@@ -60,14 +60,15 @@
                 <thead>
                     <tr>
                         <th>Nome</th>
-                        <th>Pontos</th>
+                        <th>
+                            <a href="#" @click="sort = (sort === 'desc')?'asc':'desc'">Pontos</a></th>
                         <th>GM</th>
                         <th>GS</th>
                         <th>Saldo</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="team in teams">
+                    <tr v-for="team in sortedTeams">
                         <td>
                             <img :src="team.escudo" height="40" alt="">
                             {{team.name}}
@@ -114,7 +115,9 @@
 </body>
 <!-- development version, includes helpful console warnings -->
 <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lodash@4.17.11/lodash.min.js"></script>
 <script>
+
     class Team {
         constructor(name, escudo) {
             this.name = name;
@@ -150,22 +153,18 @@
         }
 
         tie(goalsScored, goalsConceded) {
-            console.log(this.name + " chamou o metodo no tie...");
             this.updateScoreTable(1, goalsScored, goalsConceded)
         }
 
         win(goalsScored, goalsConceded) {
-            console.log(this.name + " chamou o metodo no win...");
             this.updateScoreTable(3, goalsScored, goalsConceded)
         }
 
         loss(goalsScored, goalsConceded) {
-            console.log(this.name + " chamou o metodo no loss...");
             this.updateScoreTable(0, goalsScored, goalsConceded)
         }
 
         updateScoreTable(points, goalsScored, goalsConceded) {
-            console.log(this.name + " gm:" + goalsScored + " gs:" + goalsConceded);
             this.points += points;
             this.gm += goalsScored;
             this.gs += goalsConceded;
@@ -177,6 +176,7 @@
         el: "#app",
         data: {
             goals: 3,
+            sort: 'desc',
             mode: 'score',
             teams: [
                 new Team('América MG', 'assets/america-mg.png'),
@@ -210,14 +210,18 @@
         },
         computed: {
             top4() {
-                return this.teams.slice(0, 4);
+                return this.sortedTeams.slice(0, 4);
             },
             top6() {
-                return this.teams.slice(4, 6);
+                return this.sortedTeams.slice(4, 6);
             },
             last4() {
-                return this.teams.slice(this.teams.length - 4, this.teams.length);
+                return this.sortedTeams.slice(this.teams.length - 4, this.teams.length);
             },
+            sortedTeams(){
+                console.log(_.orderBy(this.teams, 'points', this.sort));
+                return _.orderBy(this.teams, 'points', this.sort);
+            }
         },
         methods: {
             createGame() {
@@ -233,7 +237,6 @@
                 this.newGame.team1.goals = 0;
                 this.newGame.team2.team = this.teams[id2];
                 this.newGame.team2.goals = 0;
-                console.log(this.newGame.team1.team.name + " vs. " + this.newGame.team2.team.name);
             },
 
             endGame() {
