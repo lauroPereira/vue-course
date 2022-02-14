@@ -67,26 +67,55 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="time in times">
+                    <tr v-for="team in teams">
                         <td>
-                            <img :src="time.escudo" height="40" alt="">
-                            {{time.name}}
+                            <img :src="team.escudo" height="40" alt="">
+                            {{team.name}}
                         </td>
-                        <td>{{time.points}}</td>
-                        <td>{{time.gm}}</td>
-                        <td>{{time.gs}}</td>
+                        <td>{{team.points}}</td>
+                        <td>{{team.gm}}</td>
+                        <td>{{team.gs}}</td>
                         <!-- pipe '|' its a filter, that is used to transform data-->
-                        <td><b class="text-danger">{{time | score | emphasis}}</b></td>
+                        <td><b class="text-danger">{{team | score | emphasis}}</b></td>
                     </tr>
                 </tbody>
             </table>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <h3>Libertadores da América (Eliminatórias)</h3>
+                <ul>
+                    <li v-for="team in top4">
+                        <img :src="team.escudo" height="40" alt="">
+                        {{team.name}}
+                    </li>
+                </ul>
+            </div>
+            <div class="col-md-4">
+                <h3>Libertadores da América (Grupos)</h3>
+                <ul>
+                    <li v-for="team in top6">
+                        <img :src="team.escudo" height="40" alt="">
+                        {{team.name}}
+                    </li>
+                </ul>
+            </div>
+            <div class="col-md-4">
+                <h3>Times Rebaixados</h3>
+                <ul>
+                    <li v-for="team in last4">
+                        <img :src="team.escudo" height="40" alt="">
+                        {{team.name}}
+                    </li>
+                </ul>
+            </div>
         </div>
     </div>
 </body>
 <!-- development version, includes helpful console warnings -->
 <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
 <script>
-    class Time {
+    class Team {
         constructor(name, escudo) {
             this.name = name;
             this.escudo = escudo;
@@ -149,24 +178,24 @@
         data: {
             goals: 3,
             mode: 'score',
-            times: [
-                new Time('América MG', 'assets/america-mg.png'),
-                new Time('Botafogo', 'assets/botafogo.png'),
-                new Time('Corinthias', 'assets/corinthias.png'),
-                new Time('Grêmio', 'assets/gremio.png'),
-                new Time('Palmeiras', 'assets/palmeiras.png'),
-                new Time('Vasco', 'assets/vasco.png'),
-                new Time('Atlético Mineiro', 'assets/atletico-mineiro.png'),
-                new Time('Ceara', 'assets/ceara.png'),
-                new Time('Flamengo', 'assets/flamengo.png'),
-                new Time('Internacional', 'assets/internacional.png'),
-                new Time('São Paulo', 'assets/sao-paulo.png'),
-                new Time('Vitória', 'assets/vitoria.png'),
-                new Time('Bahia', 'assets/bahia.png'),
-                new Time('Chapecoense', 'assets/chapecoense.png'),
-                new Time('Fluminense', 'assets/fluminense.png'),
-                new Time('Nautico', 'assets/nautico.jpg'),
-                new Time('Sport Recife', 'assets/sport-recife.png'),
+            teams: [
+                new Team('América MG', 'assets/america-mg.png'),
+                new Team('Botafogo', 'assets/botafogo.png'),
+                new Team('Corinthias', 'assets/corinthias.png'),
+                new Team('Grêmio', 'assets/gremio.png'),
+                new Team('Palmeiras', 'assets/palmeiras.png'),
+                new Team('Vasco', 'assets/vasco.png'),
+                new Team('Atlético Mineiro', 'assets/atletico-mineiro.png'),
+                new Team('Ceara', 'assets/ceara.png'),
+                new Team('Flamengo', 'assets/flamengo.png'),
+                new Team('Internacional', 'assets/internacional.png'),
+                new Team('São Paulo', 'assets/sao-paulo.png'),
+                new Team('Vitória', 'assets/vitoria.png'),
+                new Team('Bahia', 'assets/bahia.png'),
+                new Team('Chapecoense', 'assets/chapecoense.png'),
+                new Team('Fluminense', 'assets/fluminense.png'),
+                new Team('Nautico', 'assets/nautico.jpg'),
+                new Team('Sport Recife', 'assets/sport-recife.png'),
             ],
             newGame: {
                 team1: {
@@ -179,19 +208,30 @@
                 }
             },
         },
+        computed: {
+            top4() {
+                return this.teams.slice(0, 4);
+            },
+            top6() {
+                return this.teams.slice(4, 6);
+            },
+            last4() {
+                return this.teams.slice(this.teams.length - 4, this.teams.length);
+            },
+        },
         methods: {
             createGame() {
                 this.mode = 'match';
-                let id1 = Math.floor(Math.random() * 17),
-                    id2 = Math.floor(Math.random() * 17);
+                let id1 = Math.floor(Math.random() * this.teams.length),
+                    id2 = Math.floor(Math.random() * this.teams.length);
 
                 while (id1 == id2) {
-                    id2 = Math.floor(Math.random() * 17);
+                    id2 = Math.floor(Math.random() * this.teams.length);
                 }
 
-                this.newGame.team1.team = this.times[id1];
+                this.newGame.team1.team = this.teams[id1];
                 this.newGame.team1.goals = 0;
-                this.newGame.team2.team = this.times[id2];
+                this.newGame.team2.team = this.teams[id2];
                 this.newGame.team2.goals = 0;
                 console.log(this.newGame.team1.team.name + " vs. " + this.newGame.team2.team.name);
             },
@@ -206,11 +246,11 @@
             }
         },
         filters: {
-            score(time){
-                return time.gm - time.gs;
+            score(team) {
+                return team.gm - team.gs;
             },
-            emphasis(value){
-                str = (value === 0)?'':(value > 1 || value < -1)?' pts':' pt';
+            emphasis(value) {
+                str = (value === 0) ? '' : (value > 1 || value < -1) ? ' pts' : ' pt';
                 return value + str;
             }
         }
