@@ -56,19 +56,19 @@
             </div>
         </div>
         <div class="col-md-12" v-else>
+            <input class="form-control" type="text" v-model="search">
             <table class="table table-striped">
                 <thead>
                     <tr>
                         <th>Nome</th>
-                        <th>
-                            <a href="#" @click="sort = (sort === 'desc')?'asc':'desc'">Pontos</a></th>
-                        <th>GM</th>
-                        <th>GS</th>
+                        <th v-for="(col, idx) in order.cols">
+                            <a href="#" @click="refreshScore(idx)">{{col}}</a></th>
+                        </th>
                         <th>Saldo</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="team in sortedTeams">
+                    <tr v-for="team in resultSetTeams">
                         <td>
                             <img :src="team.escudo" height="40" alt="">
                             {{team.name}}
@@ -176,8 +176,12 @@
         el: "#app",
         data: {
             goals: 3,
-            sort: 'desc',
+            order: {
+                cols: ['points', 'gm', 'gs'],
+                sort: ['desc', 'desc', 'asc']
+            },
             mode: 'score',
+            search: '',
             teams: [
                 new Team('América MG', 'assets/america-mg.png'),
                 new Team('Botafogo', 'assets/botafogo.png'),
@@ -219,8 +223,20 @@
                 return this.sortedTeams.slice(this.teams.length - 4, this.teams.length);
             },
             sortedTeams(){
-                console.log(_.orderBy(this.teams, 'points', this.sort));
-                return _.orderBy(this.teams, 'points', this.sort);
+                let teams = _.orderBy(this.teams, this.order.cols, this.order.sort);
+
+                return teams;
+            },
+            resultSetTeams(){
+                console.log('pesquisa');
+                let teams = _.orderBy(this.teams, this.order.cols, this.order.sort);
+                let self = this;
+
+                return _.filter(teams, function(team){
+                    let textSearch = self.search.toLowerCase();
+                    return team.name.toLowerCase().indexOf(textSearch) >= 0;
+                })
+                return teams;
             }
         },
         methods: {
@@ -246,6 +262,13 @@
                 let team = this.newGame.team1.team;
                 team.endGame(opponent, goalsTeam1, goalsTeam2);
                 this.mode = 'score';
+            },
+            refreshScore(idx){
+                console.log("Atualizou a tabela");
+                console.log(this.order);
+                console.log(this.order.cols[idx] + "->" + this.order.sort[idx]);
+                //this.order.sort[idx] = (this.order.sort[idx] === 'desc')?'asc':'desc';
+                this.$set(this.order.sort, idx, (this.order.sort[idx] === 'desc')?'asc':'desc');
             }
         },
         filters: {
