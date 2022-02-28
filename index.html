@@ -21,63 +21,9 @@
         </div>
         <br><br>
         <!-- v-if destroy on else; v-show display none on else-->
-        <div class="col-md-12" v-if="mode!='score'">
-            <div class="row">
-                <div class="col-md-5 row">
-                    <div class="col-md-10">
-                        <team-brand  v-if="newGame.team1.team" :obj="newGame.team1.team" :mirror="false"></team-brand>
-                    </div>
-                    <div class="col-md-2">
-                        <input class="form-control" type="number" v-model="newGame.team1.goals">
-                    </div>
-                </div>
-                <div class="col-md-1 text-center">
-                    <h1>vs.</h1>
-                </div>
-                <div class="col-md-5 row">
-                    <div class="col-md-2">
-                        <input class="form-control" type="number" v-model="newGame.team2.goals">
-                    </div>
-                    <div class="col-md-10">
-                        <team-brand  v-if="newGame.team2.team" :obj="newGame.team2.team" :mirror="false"></team-brand>
-                    </div>
-                </div>
-                <div class="row offset-3 col-md-4">
-                    <button type="button" class="btn btn-success" @click="endGame">Fim de jogo</button>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-12" v-else>
-            <input class="form-control" type="text" v-model="search">
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th>Nome</th>
-                        <th v-for="(col, idx) in order.cols">
-                            <a href="#" @click="refreshScore(idx)">{{col}}</a>
-                        </th>
-                        </th>
-                        <th>Saldo</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="(team, idx) in resultSetTeams" 
-                        :class="{'table-success': idx<4, 'table-danger': idx>12}"
-                        :style="{'font-weight': idx>12?'bolder':'400px'}" >
-                        <td>
-                            <team-brand :obj="team" :mirror="false"></team-brand>
-                        </td>
-                        <td>{{team.points}}</td>
-                        <td>{{team.gm}}</td>
-                        <td>{{team.gs}}</td>
-                        <!-- pipe '|' its a filter, that is used to transform data-->
-                        <td>
-                            <b class="text-danger">{{team | score | emphasis}}</b>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+        <!-- @end-game is sendding from new-game vue component-->
+        <new-game v-if="mode!='score'" :home-team="homeTeam" :visitor-team="visitorTeam" @end-game="mode = 'score'"></new-game>
+        <season-table v-else :teams="teams"></season-table>
         <div class="row">
             <seasons-teams :teams="teams" :season_id="0"></seasons-teams>
             <seasons-teams :teams="teams" :season_id="1"></seasons-teams>

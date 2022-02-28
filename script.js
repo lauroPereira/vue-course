@@ -60,16 +60,115 @@ Vue.component('seasons-teams', {
     }
 });
 
+Vue.component('season-table', {
+    props: ['teams'],
+    data(){
+        return {
+            search: '',
+            order: {
+                cols: ['points', 'gm', 'gs'],
+                sort: ['desc', 'desc', 'asc']
+            },
+        }
+    },
+    template: `
+    <div>
+        <input class="form-control" type="text" v-model="search">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th v-for="(col, idx) in order.cols">
+                        <a href="#" @click="refreshScore(idx)">{{col}}</a>
+                    </th>
+                    </th>
+                    <th>Saldo</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="(team, idx) in resultSetTeams" 
+                    :class="{'table-success': idx<4, 'table-danger': idx>12}"
+                    :style="{'font-weight': idx>12?'bolder':'400px'}" >
+                    <td>
+                        <team-brand :obj="team" :mirror="false"></team-brand>
+                    </td>
+                    <td>{{team.points}}</td>
+                    <td>{{team.gm}}</td>
+                    <td>{{team.gs}}</td>
+                    <!-- pipe '|' its a filter, that is used to transform data-->
+                    <td>
+                        <b class="text-danger">{{team | score | emphasis}}</b>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>`,
+    computed: {
+        resultSetTeams() {
+            let teams_ordered = _.orderBy(this.teams, this.order.cols, this.order.sort);
+            let self = this;
+
+            return _.filter(teams_ordered, function (team) {
+                let textSearch = self.search.toLowerCase();
+                return team.name.toLowerCase().indexOf(textSearch) >= 0;
+            })
+            return teams;
+        }
+    },
+    methods: {
+        refreshScore(idx) {
+            this.$set(this.order.sort, idx, (this.order.sort[idx] === 'desc') ? 'asc' : 'desc');
+        }
+    }
+});
+
+Vue.component('new-game', {
+    props: ['homeTeam', 'visitorTeam'],
+    data(){
+        return {
+            homeGoals: 0,
+            visitorGoals: 0
+        }
+    },
+    template: `
+        <div class="row">
+            <div class="col-md-5 row">
+                <div class="col-md-10">
+                    <team-brand  v-if="homeTeam" :obj="homeTeam" :mirror="false"></team-brand>
+                </div>
+                <div class="col-md-2">
+                    <input class="form-control" type="number" v-model="homeGoals">
+                </div>
+            </div>
+            <div class="col-md-1 text-center">
+                <h1>vs.</h1>
+            </div>
+            <div class="col-md-5 row">
+                <div class="col-md-2">
+                    <input class="form-control" type="number" v-model="visitorGoals">
+                </div>
+                <div class="col-md-10">
+                    <team-brand  v-if="visitorTeam" :obj="visitorTeam" :mirror="true"></team-brand>
+                </div>
+            </div>
+            <div class="row offset-3 col-md-4">
+                <button type="button" class="btn btn-success" @click="endGame">Fim de jogo</button>
+            </div>
+        </div>
+    `,
+    methods: {
+        endGame() {
+            this.homeTeam.endGame(this.visitorTeam, parseInt(this.homeGoals), this.visitorGoals);
+            this.$emit('end-game');
+            //this.mode = 'score';
+        }
+    }
+});
+
 new Vue({
     el: "#app",
     data: {
-        goals: 3,
-        order: {
-            cols: ['points', 'gm', 'gs'],
-            sort: ['desc', 'desc', 'asc']
-        },
         mode: 'score',
-        search: '',
         teams: [
             new Team('América MG', 'assets/america-mg.png'),
             new Team('Botafogo', 'assets/botafogo.png'),
@@ -89,43 +188,8 @@ new Vue({
             new Team('Nautico', 'assets/nautico.jpg'),
             new Team('Sport Recife', 'assets/sport-recife.png'),
         ],
-        newGame: {
-            team1: {
-                team: null,
-                goals: 0
-            },
-            team2: {
-                team: null,
-                goals: 0
-            }
-        },
-    },
-    computed: {
-        top4() {
-            return this.sortedTeams.slice(0, 4);
-        },
-        top6() {
-            return this.sortedTeams.slice(4, 6);
-        },
-        last4() {
-            return this.sortedTeams.slice(this.teams.length - 4, this.teams.length);
-        },
-        sortedTeams() {
-            let teams = _.orderBy(this.teams, this.order.cols, this.order.sort);
-
-            return teams;
-        },
-        resultSetTeams() {
-            console.log('pesquisa');
-            let teams = _.orderBy(this.teams, this.order.cols, this.order.sort);
-            let self = this;
-
-            return _.filter(teams, function (team) {
-                let textSearch = self.search.toLowerCase();
-                return team.name.toLowerCase().indexOf(textSearch) >= 0;
-            })
-            return teams;
-        }
+        homeTeam: null,
+        visitorTeam: null,
     },
     methods: {
         createGame() {
@@ -137,26 +201,8 @@ new Vue({
                 id2 = Math.floor(Math.random() * this.teams.length);
             }
 
-            this.newGame.team1.team = this.teams[id1];
-            this.newGame.team1.goals = 0;
-            this.newGame.team2.team = this.teams[id2];
-            this.newGame.team2.goals = 0;
-        },
-
-        endGame() {
-            let goalsTeam1 = parseInt(this.newGame.team1.goals);
-            let goalsTeam2 = parseInt(this.newGame.team2.goals);
-            let opponent = this.newGame.team2.team;
-            let team = this.newGame.team1.team;
-            team.endGame(opponent, goalsTeam1, goalsTeam2);
-            this.mode = 'score';
-        },
-        refreshScore(idx) {
-            console.log("Atualizou a tabela");
-            console.log(this.order);
-            console.log(this.order.cols[idx] + "->" + this.order.sort[idx]);
-            //this.order.sort[idx] = (this.order.sort[idx] === 'desc')?'asc':'desc';
-            this.$set(this.order.sort, idx, (this.order.sort[idx] === 'desc') ? 'asc' : 'desc');
+            this.homeTeam = this.teams[id1];
+            this.visitorTeam = this.teams[id2];
         }
     }
 })
