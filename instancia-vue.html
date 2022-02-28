@@ -5,20 +5,34 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <title>Instancia VUE</title>
+    <title>Instancia VUE - usando componentes</title>
 </head>
 <body>
     <div id="app">
-        <input type="text" v-model="variavel">{{variavel}}
-        <input type="text" v-model="variavel2">{{variavel2}}
-        <p>
-            {{parseInt(variavel) + parseInt(variavel2)}}
-        </p>
+        <contar></contar>
+        <contar></contar>
+        <contar></contar>
+        <contar></contar>
     </div>    
 </body>
 <!-- development version, includes helpful console warnings -->
 <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
 <script>
+    Vue.component('contar', {
+        template: `
+        <div id="contar">
+            <button type="button" @click="conte">Contar</button>
+            <label>{{contador}}</label>
+        </div>`,
+        methods: {
+            conte(){
+                this.contador++;
+            }
+        },
+        data() {
+            return {contador: 0};
+        }
+    });
     new Vue({
         el: "#app",
         data: {
