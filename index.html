@@ -79,30 +79,9 @@
             </table>
         </div>
         <div class="row">
-            <div class="col-md-4">
-                <h3>Libertadores da América (Eliminatórias)</h3>
-                <ul>
-                    <li v-for="team in top4">
-                        <team-brand :obj="team"></team-brand>
-                    </li>
-                </ul>
-            </div>
-            <div class="col-md-4">
-                <h3>Libertadores da América (Grupos)</h3>
-                <ul>
-                    <li v-for="team in top6">
-                        <team-brand :obj="team"></team-brand>
-                    </li>
-                </ul>
-            </div>
-            <div class="col-md-4">
-                <h3>Times Rebaixados</h3>
-                <ul>
-                    <li v-for="team in last4">
-                        <team-brand :obj="team"></team-brand>
-                    </li>
-                </ul>
-            </div>
+            <seasons-teams :teams="teams" :season_id="0"></seasons-teams>
+            <seasons-teams :teams="teams" :season_id="1"></seasons-teams>
+            <seasons-teams :teams="teams" :season_id="2"></seasons-teams>
         </div>
     </div>
 </body>

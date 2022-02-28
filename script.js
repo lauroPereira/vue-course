@@ -7,13 +7,57 @@ Vue.component('titulo', {
 
 Vue.component('team-brand', {
     props: ['obj', 'mirror'],
-    template: 
-    `
+    template:
+        `
     <div style="display: flex; flex-direction: row">
         <img :src="obj.escudo" height="40" alt="" :style="{order: mirror?1:0}">
         <span :style="{order: mirror?0:1}">{{obj.name}}</span>
     </div>
     `
+});
+
+Vue.component('seasons-teams', {
+    props: ['teams', 'season_id'],
+    template: `
+        <div class="col-md-4">
+            <h3>{{get_season.name}}</h3>
+            <ul>
+                <li v-for="team in top">
+                    <team-brand :obj="team"></team-brand>
+                </li>
+            </ul>
+        </div>
+    `,
+    computed: {
+        top() {
+            return this.sortedTeams.slice(this.get_season.idx_start, this.get_season.idx_end);
+        },
+        get_season() {
+            let season = {};
+
+            switch (this.season_id) {
+                case 0:
+                    season.name = "Libertadores da América (Eliminatórias)";
+                    season.idx_start = 0;
+                    season.idx_end = 4;
+                    break;
+                case 1:
+                    season.name = "Libertadores da América (Grupos)";
+                    season.idx_start = 4;
+                    season.idx_end = 6;
+                    break;
+                case 2:
+                    season.name = "Times Rebaixados (Série B)";
+                    season.idx_start = this.teams.length - 4;
+                    season.idx_end = this.teams.length;
+                    break;
+            }
+            return season;
+        },
+        sortedTeams() {
+            return _.orderBy(this.teams, ['points', 'gm', 'gs'], ['desc', 'desc', 'asc']);
+        }
+    }
 });
 
 new Vue({
