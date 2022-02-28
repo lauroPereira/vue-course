@@ -14,9 +14,7 @@
 
 <body>
     <div id="app" class="container">
-        <div class="row">
-            <h3>Campeonato Brasileiro</h3>
-        </div>
+        <titulo></titulo>
         <br>
         <div class="row offset-3 col-md-4">
             <button class="btn btn-info" @click="createGame">Criar partida</button>
@@ -62,7 +60,8 @@
                     <tr>
                         <th>Nome</th>
                         <th v-for="(col, idx) in order.cols">
-                            <a href="#" @click="refreshScore(idx)">{{col}}</a></th>
+                            <a href="#" @click="refreshScore(idx)">{{col}}</a>
+                        </th>
                         </th>
                         <th>Saldo</th>
                     </tr>
@@ -116,174 +115,10 @@
 <!-- development version, includes helpful console warnings -->
 <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.11/lodash.min.js"></script>
-<script>
-
-    class Team {
-        constructor(name, escudo) {
-            this.name = name;
-            this.escudo = escudo;
-
-            this.points = 0;
-            this.gm = 0;
-            this.gs = 0;
-        }
-
-        endGame(opponent, goalsScored, goalsConceded) {
-            if (this.tiedMatch(goalsScored, goalsConceded)) {
-                this.tie(goalsScored, goalsConceded);
-                opponent.tie(goalsConceded, goalsScored);
-            } else {
-
-                if (this.winMatch(goalsScored, goalsConceded)) {
-                    this.win(goalsScored, goalsConceded);
-                    opponent.loss(goalsConceded, goalsScored);
-                } else {
-                    this.loss(goalsScored, goalsConceded);
-                    opponent.win(goalsConceded, goalsScored);
-                }
-            }
-        }
-
-        tiedMatch(goalsScored, goalsConceded) {
-            return goalsScored === goalsConceded;
-        }
-
-        winMatch(goalsScored, goalsConceded) {
-            return goalsScored > goalsConceded;
-        }
-
-        tie(goalsScored, goalsConceded) {
-            this.updateScoreTable(1, goalsScored, goalsConceded)
-        }
-
-        win(goalsScored, goalsConceded) {
-            this.updateScoreTable(3, goalsScored, goalsConceded)
-        }
-
-        loss(goalsScored, goalsConceded) {
-            this.updateScoreTable(0, goalsScored, goalsConceded)
-        }
-
-        updateScoreTable(points, goalsScored, goalsConceded) {
-            this.points += points;
-            this.gm += goalsScored;
-            this.gs += goalsConceded;
-        }
-
-    }
-
-    new Vue({
-        el: "#app",
-        data: {
-            goals: 3,
-            order: {
-                cols: ['points', 'gm', 'gs'],
-                sort: ['desc', 'desc', 'asc']
-            },
-            mode: 'score',
-            search: '',
-            teams: [
-                new Team('América MG', 'assets/america-mg.png'),
-                new Team('Botafogo', 'assets/botafogo.png'),
-                new Team('Corinthias', 'assets/corinthias.png'),
-                new Team('Grêmio', 'assets/gremio.png'),
-                new Team('Palmeiras', 'assets/palmeiras.png'),
-                new Team('Vasco', 'assets/vasco.png'),
-                new Team('Atlético Mineiro', 'assets/atletico-mineiro.png'),
-                new Team('Ceara', 'assets/ceara.png'),
-                new Team('Flamengo', 'assets/flamengo.png'),
-                new Team('Internacional', 'assets/internacional.png'),
-                new Team('São Paulo', 'assets/sao-paulo.png'),
-                new Team('Vitória', 'assets/vitoria.png'),
-                new Team('Bahia', 'assets/bahia.png'),
-                new Team('Chapecoense', 'assets/chapecoense.png'),
-                new Team('Fluminense', 'assets/fluminense.png'),
-                new Team('Nautico', 'assets/nautico.jpg'),
-                new Team('Sport Recife', 'assets/sport-recife.png'),
-            ],
-            newGame: {
-                team1: {
-                    team: null,
-                    goals: 0
-                },
-                team2: {
-                    team: null,
-                    goals: 0
-                }
-            },
-        },
-        computed: {
-            top4() {
-                return this.sortedTeams.slice(0, 4);
-            },
-            top6() {
-                return this.sortedTeams.slice(4, 6);
-            },
-            last4() {
-                return this.sortedTeams.slice(this.teams.length - 4, this.teams.length);
-            },
-            sortedTeams(){
-                let teams = _.orderBy(this.teams, this.order.cols, this.order.sort);
-
-                return teams;
-            },
-            resultSetTeams(){
-                console.log('pesquisa');
-                let teams = _.orderBy(this.teams, this.order.cols, this.order.sort);
-                let self = this;
-
-                return _.filter(teams, function(team){
-                    let textSearch = self.search.toLowerCase();
-                    return team.name.toLowerCase().indexOf(textSearch) >= 0;
-                })
-                return teams;
-            }
-        },
-        methods: {
-            createGame() {
-                this.mode = 'match';
-                let id1 = Math.floor(Math.random() * this.teams.length),
-                    id2 = Math.floor(Math.random() * this.teams.length);
-
-                while (id1 == id2) {
-                    id2 = Math.floor(Math.random() * this.teams.length);
-                }
-
-                this.newGame.team1.team = this.teams[id1];
-                this.newGame.team1.goals = 0;
-                this.newGame.team2.team = this.teams[id2];
-                this.newGame.team2.goals = 0;
-            },
-
-            endGame() {
-                let goalsTeam1 = parseInt(this.newGame.team1.goals);
-                let goalsTeam2 = parseInt(this.newGame.team2.goals);
-                let opponent = this.newGame.team2.team;
-                let team = this.newGame.team1.team;
-                team.endGame(opponent, goalsTeam1, goalsTeam2);
-                this.mode = 'score';
-            },
-            refreshScore(idx){
-                console.log("Atualizou a tabela");
-                console.log(this.order);
-                console.log(this.order.cols[idx] + "->" + this.order.sort[idx]);
-                //this.order.sort[idx] = (this.order.sort[idx] === 'desc')?'asc':'desc';
-                this.$set(this.order.sort, idx, (this.order.sort[idx] === 'desc')?'asc':'desc');
-            }
-        },
-        filters: {
-            score(team) {
-                return team.gm - team.gs;
-            },
-            emphasis(value) {
-                str = (value === 0) ? '' : (value > 1 || value < -1) ? ' pts' : ' pt';
-                return value + str;
-            }
-        }
-    })
-</script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
     crossorigin="anonymous"></script>
+<script src="team.js"></script>
+<script src="script.js"></script>
 
 </html>
