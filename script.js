@@ -114,14 +114,5 @@ new Vue({
             //this.order.sort[idx] = (this.order.sort[idx] === 'desc')?'asc':'desc';
             this.$set(this.order.sort, idx, (this.order.sort[idx] === 'desc') ? 'asc' : 'desc');
         }
-    },
-    filters: {
-        score(team) {
-            return team.gm - team.gs;
-        },
-        emphasis(value) {
-            str = (value === 0) ? '' : (value > 1 || value < -1) ? ' pts' : ' pt';
-            return value + str;
-        }
     }
 })
