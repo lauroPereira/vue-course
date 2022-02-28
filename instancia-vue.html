@@ -9,19 +9,30 @@
 </head>
 <body>
     <div id="app">
-        <hello></hello>
+        <contar></contar>
+        <contar></contar>
+        <contar></contar>
+        <contar></contar>
     </div>    
 </body>
 <!-- development version, includes helpful console warnings -->
 <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
 <script>
-    Vue.component('hello', {
+    Vue.component('contar', {
         template: `
-        <div id="hello">
-            <h1>Olá</h1>
-            <h3>Eu sou um componente</h3>
-            <p>Assim o código fica bem melhor organizado</p>
-        </div>`});
+        <div id="contar">
+            <button type="button" @click="conte">Contar</button>
+            <label>{{contador}}</label>
+        </div>`,
+        methods: {
+            conte(){
+                this.contador++;
+            }
+        },
+        data() {
+            return {contador: 0};
+        }
+    });
     new Vue({
         el: "#app",
         data: {
