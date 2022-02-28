@@ -6,12 +6,12 @@ Vue.component('titulo', {
 });
 
 Vue.component('team-brand', {
-    props: ['obj'],
+    props: ['obj', 'mirror'],
     template: 
     `
-    <div>
-        <img :src="obj.escudo" height="40" alt="">
-        {{obj.name}}
+    <div style="display: flex; flex-direction: row">
+        <img :src="obj.escudo" height="40" alt="" :style="{order: mirror?1:0}">
+        <span :style="{order: mirror?0:1}">{{obj.name}}</span>
     </div>
     `
 });

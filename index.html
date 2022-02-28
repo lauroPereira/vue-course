@@ -24,11 +24,8 @@
         <div class="col-md-12" v-if="mode!='score'">
             <div class="row">
                 <div class="col-md-5 row">
-                    <div class="col-md-3">
-                        <img :src="newGame.team1.team? newGame.team1.team.escudo : ''" height="100" alt="">
-                    </div>
-                    <div class="col-md-6  offset-1">
-                        <h3>{{newGame.team1.team ? newGame.team1.team.name : ''}}</h3>
+                    <div class="col-md-10">
+                        <team-brand  v-if="newGame.team1.team" :obj="newGame.team1.team" :mirror="false"></team-brand>
                     </div>
                     <div class="col-md-2">
                         <input class="form-control" type="number" v-model="newGame.team1.goals">
@@ -41,11 +38,8 @@
                     <div class="col-md-2">
                         <input class="form-control" type="number" v-model="newGame.team2.goals">
                     </div>
-                    <div class="col-md-6  offset-1">
-                        <h3>{{newGame.team2.team ? newGame.team2.team.name : ''}}</h3>
-                    </div>
-                    <div class="col-md-3">
-                        <img :src="newGame.team2.team? newGame.team2.team.escudo : ''" height="100" alt="">
+                    <div class="col-md-10">
+                        <team-brand  v-if="newGame.team2.team" :obj="newGame.team2.team" :mirror="false"></team-brand>
                     </div>
                 </div>
                 <div class="row offset-3 col-md-4">
@@ -71,7 +65,7 @@
                         :class="{'table-success': idx<4, 'table-danger': idx>12}"
                         :style="{'font-weight': idx>12?'bolder':'400px'}" >
                         <td>
-                            <team-brand :obj="team"></team-brand>
+                            <team-brand :obj="team" :mirror="false"></team-brand>
                         </td>
                         <td>{{team.points}}</td>
                         <td>{{team.gm}}</td>
