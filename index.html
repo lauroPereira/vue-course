@@ -69,14 +69,15 @@
                 <tbody>
                     <tr v-for="team in resultSetTeams">
                         <td>
-                            <img :src="team.escudo" height="40" alt="">
-                            {{team.name}}
+                            <team-brand :obj="team"></team-brand>
                         </td>
                         <td>{{team.points}}</td>
                         <td>{{team.gm}}</td>
                         <td>{{team.gs}}</td>
                         <!-- pipe '|' its a filter, that is used to transform data-->
-                        <td><b class="text-danger">{{team | score | emphasis}}</b></td>
+                        <td>
+                            <b class="text-danger">{{team | score | emphasis}}</b>
+                        </td>
                     </tr>
                 </tbody>
             </table>
@@ -86,8 +87,7 @@
                 <h3>Libertadores da América (Eliminatórias)</h3>
                 <ul>
                     <li v-for="team in top4">
-                        <img :src="team.escudo" height="40" alt="">
-                        {{team.name}}
+                        <team-brand :obj="team"></team-brand>
                     </li>
                 </ul>
             </div>
@@ -95,8 +95,7 @@
                 <h3>Libertadores da América (Grupos)</h3>
                 <ul>
                     <li v-for="team in top6">
-                        <img :src="team.escudo" height="40" alt="">
-                        {{team.name}}
+                        <team-brand :obj="team"></team-brand>
                     </li>
                 </ul>
             </div>
@@ -104,8 +103,7 @@
                 <h3>Times Rebaixados</h3>
                 <ul>
                     <li v-for="team in last4">
-                        <img :src="team.escudo" height="40" alt="">
-                        {{team.name}}
+                        <team-brand :obj="team"></team-brand>
                     </li>
                 </ul>
             </div>

@@ -3,7 +3,18 @@ Vue.component('titulo', {
         <div class="row">
             <h3>Campeonato Brasileiro</h3>
         </div>`
-})
+});
+
+Vue.component('team-brand', {
+    props: ['obj'],
+    template: 
+    `
+    <div>
+        <img :src="obj.escudo" height="40" alt="">
+        {{obj.name}}
+    </div>
+    `
+});
 
 new Vue({
     el: "#app",
