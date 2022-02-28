@@ -45,9 +45,9 @@ class Team {
     }
 
     updateScoreTable(points, goalsScored, goalsConceded) {
-        this.points += points;
-        this.gm += goalsScored;
-        this.gs += goalsConceded;
+        this.points += parseInt(points);
+        this.gm += parseInt(goalsScored);
+        this.gs += parseInt(goalsConceded);
     }
 
 }
