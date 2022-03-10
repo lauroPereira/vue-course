@@ -13,23 +13,7 @@
 </head>
 
 <body>
-    <div id="app" class="container">
-        <titulo></titulo>
-        <br>
-        <div class="row offset-3 col-md-4">
-            <button class="btn btn-info" @click="createGame">Criar partida</button>
-        </div>
-        <br><br>
-        <!-- v-if destroy on else; v-show display none on else-->
-        <!-- @end-game is sendding from new-game vue component-->
-        <new-game v-if="mode!='score'" :home-team="homeTeam" :visitor-team="visitorTeam" @end-game="mode = 'score'"></new-game>
-        <season-table v-else :teams="teams"></season-table>
-        <div class="row">
-            <seasons-teams :teams="teams" :season_id="0"></seasons-teams>
-            <seasons-teams :teams="teams" :season_id="1"></seasons-teams>
-            <seasons-teams :teams="teams" :season_id="2"></seasons-teams>
-        </div>
-    </div>
+    <div id="app"></div>
 </body>
 <!-- development version, includes helpful console warnings -->
 <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>

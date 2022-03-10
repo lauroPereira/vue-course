@@ -165,31 +165,51 @@ Vue.component('new-game', {
     }
 });
 
-new Vue({
-    el: "#app",
-    data: {
-        mode: 'score',
-        teams: [
-            new Team('América MG', 'assets/america-mg.png'),
-            new Team('Botafogo', 'assets/botafogo.png'),
-            new Team('Corinthias', 'assets/corinthias.png'),
-            new Team('Grêmio', 'assets/gremio.png'),
-            new Team('Palmeiras', 'assets/palmeiras.png'),
-            new Team('Vasco', 'assets/vasco.png'),
-            new Team('Atlético Mineiro', 'assets/atletico-mineiro.png'),
-            new Team('Ceara', 'assets/ceara.png'),
-            new Team('Flamengo', 'assets/flamengo.png'),
-            new Team('Internacional', 'assets/internacional.png'),
-            new Team('São Paulo', 'assets/sao-paulo.png'),
-            new Team('Vitória', 'assets/vitoria.png'),
-            new Team('Bahia', 'assets/bahia.png'),
-            new Team('Chapecoense', 'assets/chapecoense.png'),
-            new Team('Fluminense', 'assets/fluminense.png'),
-            new Team('Nautico', 'assets/nautico.jpg'),
-            new Team('Sport Recife', 'assets/sport-recife.png'),
-        ],
-        homeTeam: null,
-        visitorTeam: null,
+Vue.component('my-app', {
+    template: `
+    <div id="app" class="container">
+        <titulo></titulo>
+        <br>
+        <div class="row offset-3 col-md-4">
+            <button class="btn btn-info" @click="createGame">Criar partida</button>
+        </div>
+        <br><br>
+        <!-- v-if destroy on else; v-show display none on else-->
+        <!-- @end-game is sendding from new-game vue component-->
+        <new-game v-if="mode!='score'" :home-team="homeTeam" :visitor-team="visitorTeam" @end-game="mode = 'score'"></new-game>
+        <season-table v-else :teams="teams"></season-table>
+        <div class="row">
+            <seasons-teams :teams="teams" :season_id="0"></seasons-teams>
+            <seasons-teams :teams="teams" :season_id="1"></seasons-teams>
+            <seasons-teams :teams="teams" :season_id="2"></seasons-teams>
+        </div>
+    </div>
+    `,
+    data(){
+        return {
+            mode: 'score',
+            teams: [
+                new Team('América MG', 'assets/america-mg.png'),
+                new Team('Botafogo', 'assets/botafogo.png'),
+                new Team('Corinthias', 'assets/corinthias.png'),
+                new Team('Grêmio', 'assets/gremio.png'),
+                new Team('Palmeiras', 'assets/palmeiras.png'),
+                new Team('Vasco', 'assets/vasco.png'),
+                new Team('Atlético Mineiro', 'assets/atletico-mineiro.png'),
+                new Team('Ceara', 'assets/ceara.png'),
+                new Team('Flamengo', 'assets/flamengo.png'),
+                new Team('Internacional', 'assets/internacional.png'),
+                new Team('São Paulo', 'assets/sao-paulo.png'),
+                new Team('Vitória', 'assets/vitoria.png'),
+                new Team('Bahia', 'assets/bahia.png'),
+                new Team('Chapecoense', 'assets/chapecoense.png'),
+                new Team('Fluminense', 'assets/fluminense.png'),
+                new Team('Nautico', 'assets/nautico.jpg'),
+                new Team('Sport Recife', 'assets/sport-recife.png'),
+            ],
+            homeTeam: null,
+            visitorTeam: null,
+        }
     },
     methods: {
         createGame() {
@@ -205,4 +225,9 @@ new Vue({
             this.visitorTeam = this.teams[id2];
         }
     }
+});
+
+new Vue({
+    el: "#app",
+    template: `<my-app></my-app>`
 })
