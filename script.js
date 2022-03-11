@@ -1,3 +1,56 @@
+Vue.component('my-app', {
+    template: `
+    <div id="app" class="container">
+        <titulo></titulo>
+        <br>
+        <new-game :teams="teams" @new-game="showGame($event)"></new-game>
+        <br><br>
+        <!-- v-if destroy on else; v-show display none on else-->
+        <!-- @end-game is sendding from new-game vue component-->
+        <score v-if="mode!='score'" :home-team="homeTeam" :visitor-team="visitorTeam" @end-game="mode = 'score'"></score>
+        <season-table v-else :teams="teams"></season-table>
+        <div class="row">
+            <seasons-teams :teams="teams" :season_id="0"></seasons-teams>
+            <seasons-teams :teams="teams" :season_id="1"></seasons-teams>
+            <seasons-teams :teams="teams" :season_id="2"></seasons-teams>
+        </div>
+    </div>
+    `,
+    data(){
+        return {
+            mode: 'score',
+            teams: [
+                new Team('América MG', 'assets/america-mg.png'),
+                new Team('Botafogo', 'assets/botafogo.png'),
+                new Team('Corinthias', 'assets/corinthias.png'),
+                new Team('Grêmio', 'assets/gremio.png'),
+                new Team('Palmeiras', 'assets/palmeiras.png'),
+                new Team('Vasco', 'assets/vasco.png'),
+                new Team('Atlético Mineiro', 'assets/atletico-mineiro.png'),
+                new Team('Ceara', 'assets/ceara.png'),
+                new Team('Flamengo', 'assets/flamengo.png'),
+                new Team('Internacional', 'assets/internacional.png'),
+                new Team('São Paulo', 'assets/sao-paulo.png'),
+                new Team('Vitória', 'assets/vitoria.png'),
+                new Team('Bahia', 'assets/bahia.png'),
+                new Team('Chapecoense', 'assets/chapecoense.png'),
+                new Team('Fluminense', 'assets/fluminense.png'),
+                new Team('Nautico', 'assets/nautico.jpg'),
+                new Team('Sport Recife', 'assets/sport-recife.png'),
+            ],
+            homeTeam: null,
+            visitorTeam: null
+        }
+    },
+    methods: {
+        showGame({homeTeam, visitorTeam}){
+            this.homeTeam = homeTeam;
+            this.visitorTeam = visitorTeam;
+            this.mode = 'match';
+        }
+    }
+});
+
 Vue.component('titulo', {
     template: `
         <div class="row">
@@ -5,57 +58,45 @@ Vue.component('titulo', {
         </div>`
 });
 
-Vue.component('team-brand', {
-    props: ['obj', 'mirror'],
-    template:
-        `
-    <div style="display: flex; flex-direction: row">
-        <img :src="obj.escudo" height="40" alt="" :style="{order: mirror?1:0}">
-        <span :style="{order: mirror?0:1}">{{obj.name}}</span>
-    </div>
-    `
-});
-
-Vue.component('seasons-teams', {
-    props: ['teams', 'season_id'],
+Vue.component('score', {
+    props: ['homeTeam', 'visitorTeam'],
+    data(){
+        return {
+            homeGoals: 0,
+            visitorGoals: 0
+        }
+    },
     template: `
-        <div class="col-md-4">
-            <h3>{{get_season.name}}</h3>
-            <ul>
-                <li v-for="team in top">
-                    <team-brand :obj="team"></team-brand>
-                </li>
-            </ul>
+        <div class="row">
+            <div class="col-md-5 row">
+                <div class="col-md-10">
+                    <team-brand  v-if="homeTeam" :obj="homeTeam" :mirror="false"></team-brand>
+                </div>
+                <div class="col-md-2">
+                    <input class="form-control" type="number" v-model="homeGoals">
+                </div>
+            </div>
+            <div class="col-md-1 text-center">
+                <h1>vs.</h1>
+            </div>
+            <div class="col-md-5 row">
+                <div class="col-md-2">
+                    <input class="form-control" type="number" v-model="visitorGoals">
+                </div>
+                <div class="col-md-10">
+                    <team-brand  v-if="visitorTeam" :obj="visitorTeam" :mirror="true"></team-brand>
+                </div>
+            </div>
+            <div class="row offset-3 col-md-4">
+                <button type="button" class="btn btn-success" @click="endGame">Fim de jogo</button>
+            </div>
         </div>
     `,
-    computed: {
-        top() {
-            return this.sortedTeams.slice(this.get_season.idx_start, this.get_season.idx_end);
-        },
-        get_season() {
-            let season = {};
-
-            switch (this.season_id) {
-                case 0:
-                    season.name = "Libertadores da América (Eliminatórias)";
-                    season.idx_start = 0;
-                    season.idx_end = 4;
-                    break;
-                case 1:
-                    season.name = "Libertadores da América (Grupos)";
-                    season.idx_start = 4;
-                    season.idx_end = 6;
-                    break;
-                case 2:
-                    season.name = "Times Rebaixados (Série B)";
-                    season.idx_start = this.teams.length - 4;
-                    season.idx_end = this.teams.length;
-                    break;
-            }
-            return season;
-        },
-        sortedTeams() {
-            return _.orderBy(this.teams, ['points', 'gm', 'gs'], ['desc', 'desc', 'asc']);
+    methods: {
+        endGame() {
+            this.homeTeam.endGame(this.visitorTeam, parseInt(this.homeGoals), this.visitorGoals);
+            this.$emit('end-game');
+            //this.mode = 'score';
         }
     }
 });
@@ -122,98 +163,59 @@ Vue.component('season-table', {
     }
 });
 
-Vue.component('new-game', {
-    props: ['homeTeam', 'visitorTeam'],
-    data(){
-        return {
-            homeGoals: 0,
-            visitorGoals: 0
-        }
-    },
+Vue.component('seasons-teams', {
+    props: ['teams', 'season_id'],
     template: `
-        <div class="row">
-            <div class="col-md-5 row">
-                <div class="col-md-10">
-                    <team-brand  v-if="homeTeam" :obj="homeTeam" :mirror="false"></team-brand>
-                </div>
-                <div class="col-md-2">
-                    <input class="form-control" type="number" v-model="homeGoals">
-                </div>
-            </div>
-            <div class="col-md-1 text-center">
-                <h1>vs.</h1>
-            </div>
-            <div class="col-md-5 row">
-                <div class="col-md-2">
-                    <input class="form-control" type="number" v-model="visitorGoals">
-                </div>
-                <div class="col-md-10">
-                    <team-brand  v-if="visitorTeam" :obj="visitorTeam" :mirror="true"></team-brand>
-                </div>
-            </div>
-            <div class="row offset-3 col-md-4">
-                <button type="button" class="btn btn-success" @click="endGame">Fim de jogo</button>
-            </div>
+        <div class="col-md-4">
+            <h3>{{get_season.name}}</h3>
+            <ul>
+                <li v-for="team in top">
+                    <team-brand :obj="team"></team-brand>
+                </li>
+            </ul>
         </div>
     `,
-    methods: {
-        endGame() {
-            this.homeTeam.endGame(this.visitorTeam, parseInt(this.homeGoals), this.visitorGoals);
-            this.$emit('end-game');
-            //this.mode = 'score';
+    computed: {
+        top() {
+            return this.sortedTeams.slice(this.get_season.idx_start, this.get_season.idx_end);
+        },
+        get_season() {
+            let season = {};
+
+            switch (this.season_id) {
+                case 0:
+                    season.name = "Libertadores da América (Eliminatórias)";
+                    season.idx_start = 0;
+                    season.idx_end = 4;
+                    break;
+                case 1:
+                    season.name = "Libertadores da América (Grupos)";
+                    season.idx_start = 4;
+                    season.idx_end = 6;
+                    break;
+                case 2:
+                    season.name = "Times Rebaixados (Série B)";
+                    season.idx_start = this.teams.length - 4;
+                    season.idx_end = this.teams.length;
+                    break;
+            }
+            return season;
+        },
+        sortedTeams() {
+            return _.orderBy(this.teams, ['points', 'gm', 'gs'], ['desc', 'desc', 'asc']);
         }
     }
 });
 
-Vue.component('my-app', {
+Vue.component('new-game', {
     template: `
-    <div id="app" class="container">
-        <titulo></titulo>
-        <br>
-        <div class="row offset-3 col-md-4">
-            <button class="btn btn-info" @click="createGame">Criar partida</button>
-        </div>
-        <br><br>
-        <!-- v-if destroy on else; v-show display none on else-->
-        <!-- @end-game is sendding from new-game vue component-->
-        <new-game v-if="mode!='score'" :home-team="homeTeam" :visitor-team="visitorTeam" @end-game="mode = 'score'"></new-game>
-        <season-table v-else :teams="teams"></season-table>
-        <div class="row">
-            <seasons-teams :teams="teams" :season_id="0"></seasons-teams>
-            <seasons-teams :teams="teams" :season_id="1"></seasons-teams>
-            <seasons-teams :teams="teams" :season_id="2"></seasons-teams>
-        </div>
+    <div class="row offset-3 col-md-4">
+        <button class="btn btn-info" @click="createGame">Criar partida</button>
     </div>
     `,
-    data(){
-        return {
-            mode: 'score',
-            teams: [
-                new Team('América MG', 'assets/america-mg.png'),
-                new Team('Botafogo', 'assets/botafogo.png'),
-                new Team('Corinthias', 'assets/corinthias.png'),
-                new Team('Grêmio', 'assets/gremio.png'),
-                new Team('Palmeiras', 'assets/palmeiras.png'),
-                new Team('Vasco', 'assets/vasco.png'),
-                new Team('Atlético Mineiro', 'assets/atletico-mineiro.png'),
-                new Team('Ceara', 'assets/ceara.png'),
-                new Team('Flamengo', 'assets/flamengo.png'),
-                new Team('Internacional', 'assets/internacional.png'),
-                new Team('São Paulo', 'assets/sao-paulo.png'),
-                new Team('Vitória', 'assets/vitoria.png'),
-                new Team('Bahia', 'assets/bahia.png'),
-                new Team('Chapecoense', 'assets/chapecoense.png'),
-                new Team('Fluminense', 'assets/fluminense.png'),
-                new Team('Nautico', 'assets/nautico.jpg'),
-                new Team('Sport Recife', 'assets/sport-recife.png'),
-            ],
-            homeTeam: null,
-            visitorTeam: null,
-        }
-    },
+    props: ['teams'],
     methods: {
         createGame() {
-            this.mode = 'match';
             let id1 = Math.floor(Math.random() * this.teams.length),
                 id2 = Math.floor(Math.random() * this.teams.length);
 
@@ -221,10 +223,22 @@ Vue.component('my-app', {
                 id2 = Math.floor(Math.random() * this.teams.length);
             }
 
-            this.homeTeam = this.teams[id1];
-            this.visitorTeam = this.teams[id2];
+            var homeTeam = this.teams[id1];
+            var visitorTeam = this.teams[id2];
+            this.$emit('new-game',{homeTeam, visitorTeam});
         }
     }
+});
+
+Vue.component('team-brand', {
+    props: ['obj', 'mirror'],
+    template:
+        `
+    <div style="display: flex; flex-direction: row">
+        <img :src="obj.escudo" height="40" alt="" :style="{order: mirror?1:0}">
+        <span :style="{order: mirror?0:1}">{{obj.name}}</span>
+    </div>
+    `
 });
 
 new Vue({
