@@ -54,8 +54,14 @@ Vue.component('my-app', {
 Vue.component('titulo', {
     template: `
         <div class="row">
-            <h3>Campeonato Brasileiro</h3>
-        </div>`
+            <h3 @click="clicked">Campeonato Brasileiro - {{$parent.mode}}</h3>
+        </div>
+    `,
+    methods: {
+        clicked(){
+            console.log(this.$parent.mode);
+        }
+    }
 });
 
 Vue.component('score', {
@@ -213,18 +219,18 @@ Vue.component('new-game', {
         <button class="btn btn-info" @click="createGame">Criar partida</button>
     </div>
     `,
-    props: ['teams'],
+    //props: ['teams'],
     methods: {
         createGame() {
-            let id1 = Math.floor(Math.random() * this.teams.length),
-                id2 = Math.floor(Math.random() * this.teams.length);
+            let id1 = Math.floor(Math.random() * this.$parent.teams.length),
+                id2 = Math.floor(Math.random() * this.$parent.teams.length);
 
             while (id1 == id2) {
-                id2 = Math.floor(Math.random() * this.teams.length);
+                id2 = Math.floor(Math.random() * this.$parent.teams.length);
             }
 
-            var homeTeam = this.teams[id1];
-            var visitorTeam = this.teams[id2];
+            var homeTeam = this.$parent.teams[id1];
+            var visitorTeam = this.$parent.teams[id2];
             this.$emit('new-game',{homeTeam, visitorTeam});
         }
     }
