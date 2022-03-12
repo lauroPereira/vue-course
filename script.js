@@ -3,12 +3,12 @@ Vue.component('my-app', {
     <div id="app" class="container">
         <titulo></titulo>
         <br>
-        <new-game :teams="teams" @new-game="showGame($event)"></new-game>
+        <new-game @new-game="showGame($event)"></new-game>
         <br><br>
         <!-- v-if destroy on else; v-show display none on else-->
         <!-- @end-game is sendding from new-game vue component-->
         <score v-if="mode!='score'" :home-team="homeTeam" :visitor-team="visitorTeam" @end-game="mode = 'score'"></score>
-        <season-table v-else :teams="teams"></season-table>
+        <season-table v-else ></season-table>
         <div class="row">
             <seasons-teams :teams="teams" :season_id="0"></seasons-teams>
             <seasons-teams :teams="teams" :season_id="1"></seasons-teams>
@@ -16,9 +16,34 @@ Vue.component('my-app', {
         </div>
     </div>
     `,
+    provide(){
+        return {
+            teamsCollection: [
+                new Team('América MG', 'assets/america-mg.png'),
+                new Team('Botafogo', 'assets/botafogo.png'),
+                new Team('Corinthias', 'assets/corinthias.png'),
+                new Team('Grêmio', 'assets/gremio.png'),
+                new Team('Palmeiras', 'assets/palmeiras.png'),
+                new Team('Vasco', 'assets/vasco.png'),
+                new Team('Atlético Mineiro', 'assets/atletico-mineiro.png'),
+                new Team('Ceara', 'assets/ceara.png'),
+                new Team('Flamengo', 'assets/flamengo.png'),
+                new Team('Internacional', 'assets/internacional.png'),
+                new Team('São Paulo', 'assets/sao-paulo.png'),
+                new Team('Vitória', 'assets/vitoria.png'),
+                new Team('Bahia', 'assets/bahia.png'),
+                new Team('Chapecoense', 'assets/chapecoense.png'),
+                new Team('Fluminense', 'assets/fluminense.png'),
+                new Team('Nautico', 'assets/nautico.jpg'),
+                new Team('Sport Recife', 'assets/sport-recife.png'),
+            ]
+        }
+    },
     data(){
         return {
             mode: 'score',
+            homeTeam: null,
+            visitorTeam: null,
             teams: [
                 new Team('América MG', 'assets/america-mg.png'),
                 new Team('Botafogo', 'assets/botafogo.png'),
@@ -37,9 +62,7 @@ Vue.component('my-app', {
                 new Team('Fluminense', 'assets/fluminense.png'),
                 new Team('Nautico', 'assets/nautico.jpg'),
                 new Team('Sport Recife', 'assets/sport-recife.png'),
-            ],
-            homeTeam: null,
-            visitorTeam: null
+            ]
         }
     },
     methods: {
@@ -108,7 +131,6 @@ Vue.component('score', {
 });
 
 Vue.component('season-table', {
-    props: ['teams'],
     data(){
         return {
             search: '',
@@ -116,8 +138,10 @@ Vue.component('season-table', {
                 cols: ['points', 'gm', 'gs'],
                 sort: ['desc', 'desc', 'asc']
             },
+            teams: this.teamsCollection
         }
     },
+    inject: ['teamsCollection'],
     template: `
     <div>
         <input class="form-control" type="text" v-model="search">
@@ -154,12 +178,16 @@ Vue.component('season-table', {
         resultSetTeams() {
             let teams_ordered = _.orderBy(this.teams, this.order.cols, this.order.sort);
             let self = this;
+            let sorted_teams;
 
-            return _.filter(teams_ordered, function (team) {
+            sorted_teams = _.filter(teams_ordered, function (team) {
                 let textSearch = self.search.toLowerCase();
                 return team.name.toLowerCase().indexOf(textSearch) >= 0;
-            })
-            return teams;
+            });
+
+            this.$parent.teams = sorted_teams;
+            
+            return sorted_teams;
         }
     },
     methods: {
@@ -219,18 +247,23 @@ Vue.component('new-game', {
         <button class="btn btn-info" @click="createGame">Criar partida</button>
     </div>
     `,
-    //props: ['teams'],
+    data() {
+        return {
+            teams: this.teamsCollection
+        }
+    },
+    inject: ['teamsCollection'],
     methods: {
         createGame() {
-            let id1 = Math.floor(Math.random() * this.$parent.teams.length),
-                id2 = Math.floor(Math.random() * this.$parent.teams.length);
+            let id1 = Math.floor(Math.random() * this.teamsCollection.length),
+                id2 = Math.floor(Math.random() * this.teamsCollection.length);
 
             while (id1 == id2) {
-                id2 = Math.floor(Math.random() * this.$parent.teams.length);
+                id2 = Math.floor(Math.random() * this.teamsCollection.length);
             }
 
-            var homeTeam = this.$parent.teams[id1];
-            var visitorTeam = this.$parent.teams[id2];
+            var homeTeam = this.teamsCollection[id1];
+            var visitorTeam = this.teamsCollection[id2];
             this.$emit('new-game',{homeTeam, visitorTeam});
         }
     }
